@@ -1,4 +1,4 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -221,5 +221,15 @@ namespace Microsoft.AspNetCore.Http
             Assert.False(converter.CanConvertTo(typeof(int)));
             Assert.False(converter.CanConvertTo(typeof(bool)));
         }
+
+        [Fact]
+        public void PathStringStaysEqualAfterAssignments()
+        {
+            PathString p1 = "/?";
+            string s1 = p1; // Becomes "/%3F"
+            PathString p2 = s1; // Stays "/%3F"
+            Assert.Equal(p1, p2);
+        }
+
     }
 }

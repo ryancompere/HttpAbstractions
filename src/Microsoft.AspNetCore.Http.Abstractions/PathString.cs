@@ -450,9 +450,7 @@ namespace Microsoft.AspNetCore.Http
         /// </summary>
         /// <param name="path"></param>
         public static implicit operator string(PathString path)
-        {
-            return path.ToString();
-        }
+            => path.ToString();
 
         internal static PathString ConvertFromString(string s)
             => string.IsNullOrEmpty(s) ? new PathString(s) : FromUriComponent(s);
