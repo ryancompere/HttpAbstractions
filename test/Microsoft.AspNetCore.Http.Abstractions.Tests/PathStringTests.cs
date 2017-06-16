@@ -226,10 +226,9 @@ namespace Microsoft.AspNetCore.Http
         public void PathStringStaysEqualAfterAssignments()
         {
             PathString p1 = "/?";
-            string s1 = p1; // Becomes "/%3F"
-            PathString p2 = s1; // Stays "/%3F"
+            string s1 = p1;
+            PathString p2 = s1;
             Assert.Equal(p1, p2);
         }
-
     }
 }
