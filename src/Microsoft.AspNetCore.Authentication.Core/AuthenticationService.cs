@@ -173,9 +173,14 @@ namespace Microsoft.AspNetCore.Authentication
         /// <returns>A task.</returns>
         public virtual async Task SignOutAsync(HttpContext context, string scheme, AuthenticationProperties properties)
         {
-            if (string.IsNullOrEmpty(scheme))
+            if (scheme == null)
             {
-                throw new ArgumentException(nameof(scheme));
+                var defaultScheme = await Schemes.GetDefaultSignOutSchemeAsync();
+                scheme = defaultScheme?.Name;
+                if (scheme == null)
+                {
+                    throw new InvalidOperationException($"No authenticationScheme was specified, and there was no DefaultSignOutScheme found.");
+                }
             }
 
             var handler = await Handlers.GetHandlerAsync(context, scheme) as IAuthenticationSignOutHandler;

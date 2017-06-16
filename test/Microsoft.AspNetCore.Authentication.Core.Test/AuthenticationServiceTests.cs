@@ -50,6 +50,75 @@ namespace Microsoft.AspNetCore.Authentication
             await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignOutAsync("signin"));
         }
 
+        [Fact]
+        public async Task ServicesWithDefaultIAuthenticationHandlerMethodsTest()
+        {
+            var services = new ServiceCollection().AddOptions().AddAuthenticationCore(o =>
+            {
+                o.AddScheme<BaseHandler>("base", "whatever");
+            }).BuildServiceProvider();
+            var context = new DefaultHttpContext();
+            context.RequestServices = services;
+
+            await context.AuthenticateAsync();
+            await context.ChallengeAsync();
+            await context.ForbidAsync();
+            await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignOutAsync());
+            await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignInAsync(new ClaimsPrincipal()));
+        }
+
+        [Fact]
+        public async Task ServicesWithDefaultUberMethodsTest()
+        {
+            var services = new ServiceCollection().AddOptions().AddAuthenticationCore(o =>
+            {
+                o.AddScheme<UberHandler>("base", "whatever");
+            }).BuildServiceProvider();
+            var context = new DefaultHttpContext();
+            context.RequestServices = services;
+
+            await context.AuthenticateAsync();
+            await context.ChallengeAsync();
+            await context.ForbidAsync();
+            await context.SignOutAsync();
+            await context.SignInAsync(new ClaimsPrincipal());
+        }
+
+        [Fact]
+        public async Task ServicesWithDefaultSignInMethodsTest()
+        {
+            var services = new ServiceCollection().AddOptions().AddAuthenticationCore(o =>
+            {
+                o.AddScheme<SignInHandler>("base", "whatever");
+            }).BuildServiceProvider();
+            var context = new DefaultHttpContext();
+            context.RequestServices = services;
+
+            await context.AuthenticateAsync();
+            await context.ChallengeAsync();
+            await context.ForbidAsync();
+            await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignOutAsync());
+            await context.SignInAsync(new ClaimsPrincipal());
+        }
+
+        [Fact]
+        public async Task ServicesWithDefaultSignOutMethodsTest()
+        {
+            var services = new ServiceCollection().AddOptions().AddAuthenticationCore(o =>
+            {
+                o.AddScheme<SignOutHandler>("base", "whatever");
+            }).BuildServiceProvider();
+            var context = new DefaultHttpContext();
+            context.RequestServices = services;
+
+            await context.AuthenticateAsync();
+            await context.ChallengeAsync();
+            await context.ForbidAsync();
+            await context.SignOutAsync();
+            await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignInAsync(new ClaimsPrincipal()));
+        }
+
+
         private class BaseHandler : IAuthenticationHandler
         {
             public Task<AuthenticateResult> AuthenticateAsync()
