@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
@@ -36,6 +35,8 @@ namespace Microsoft.AspNetCore.Authentication
 
         private IDictionary<string, AuthenticationScheme> _map = new Dictionary<string, AuthenticationScheme>(StringComparer.Ordinal);
         private List<AuthenticationScheme> _requestHandlers = new List<AuthenticationScheme>();
+        private List<AuthenticationScheme> _signOutHandlers = new List<AuthenticationScheme>();
+        private List<AuthenticationScheme> _signInHandlers = new List<AuthenticationScheme>();
 
         /// <summary>
         /// Returns the scheme that will be used by default for <see cref="IAuthenticationService.AuthenticateAsync(HttpContext, string)"/>.
@@ -167,6 +168,14 @@ namespace Microsoft.AspNetCore.Authentication
                 {
                     _requestHandlers.Add(scheme);
                 }
+                if (typeof(IAuthenticationSignInHandler).IsAssignableFrom(scheme.HandlerType))
+                {
+                    _signInHandlers.Add(scheme);
+                }
+                if (typeof(IAuthenticationSignOutHandler).IsAssignableFrom(scheme.HandlerType))
+                {
+                    _signOutHandlers.Add(scheme);
+                }
                 _map[scheme.Name] = scheme;
             }
         }
@@ -186,7 +195,9 @@ namespace Microsoft.AspNetCore.Authentication
                 if (_map.ContainsKey(name))
                 {
                     var scheme = _map[name];
-                    _requestHandlers.Remove(_requestHandlers.Where(s => s.Name == name).FirstOrDefault());
+                    _requestHandlers.Remove(scheme);
+                    _signInHandlers.Remove(scheme);
+                    _signOutHandlers.Remove(scheme);
                     _map.Remove(name);
                 }
             }

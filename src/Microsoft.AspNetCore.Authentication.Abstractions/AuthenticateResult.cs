@@ -11,7 +11,7 @@ namespace Microsoft.AspNetCore.Authentication
     /// </summary>
     public class AuthenticateResult
     {
-        private AuthenticateResult() { }
+        protected AuthenticateResult() { }
 
         /// <summary>
         /// If a ticket was produced, authenticate was successful.
@@ -21,7 +21,7 @@ namespace Microsoft.AspNetCore.Authentication
         /// <summary>
         /// The authentication ticket.
         /// </summary>
-        public AuthenticationTicket Ticket { get; private set; }
+        public AuthenticationTicket Ticket { get; protected set; }
 
         /// <summary>
         /// Gets the claims-principal with authenticated user identities.
@@ -36,18 +36,12 @@ namespace Microsoft.AspNetCore.Authentication
         /// <summary>
         /// Holds failure information from the authentication.
         /// </summary>
-        public Exception Failure { get; private set; }
-
-        /// <summary>
-        /// Indicates that stage of authentication was directly handled by user intervention and no
-        /// further processing should be attempted.
-        /// </summary>
-        public bool Handled { get; private set; }
+        public Exception Failure { get; protected set; }
 
         /// <summary>
         /// Indicates that there was no information returned for this authentication scheme.
         /// </summary>
-        public bool Nothing { get; private set; }
+        public bool Nothing { get; protected set; }
 
         /// <summary>
         /// Indicates that authentication was successful.
@@ -61,16 +55,6 @@ namespace Microsoft.AspNetCore.Authentication
                 throw new ArgumentNullException(nameof(ticket));
             }
             return new AuthenticateResult() { Ticket = ticket };
-        }
-
-        /// <summary>
-        /// Indicates that stage of authentication was directly handled by user intervention and no
-        /// further processing should be attempted.
-        /// </summary>
-        /// <returns>The result.</returns>
-        public static AuthenticateResult Handle()
-        {
-            return new AuthenticateResult() { Handled = true };
         }
 
         /// <summary>

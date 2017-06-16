@@ -155,10 +155,10 @@ namespace Microsoft.AspNetCore.Authentication
                 }
             }
 
-            var handler = await Handlers.GetHandlerAsync(context, scheme);
+            var handler = await Handlers.GetHandlerAsync(context, scheme) as IAuthenticationSignInHandler;
             if (handler == null)
             {
-                throw new InvalidOperationException($"No authentication handler is configured to handle the scheme: {scheme}");
+                throw new InvalidOperationException($"No IAuthenticationSignInHandler is configured to handle sign in for the scheme: {scheme}");
             }
 
             await handler.SignInAsync(principal, properties);
@@ -178,10 +178,10 @@ namespace Microsoft.AspNetCore.Authentication
                 throw new ArgumentException(nameof(scheme));
             }
 
-            var handler = await Handlers.GetHandlerAsync(context, scheme);
+            var handler = await Handlers.GetHandlerAsync(context, scheme) as IAuthenticationSignOutHandler;
             if (handler == null)
             {
-                throw new InvalidOperationException($"No authentication handler is configured to handle the scheme: {scheme}");
+                throw new InvalidOperationException($"No IAuthenticationSignOutHandler is configured to handle sign out for the scheme: {scheme}");
             }
 
             await handler.SignOutAsync(properties);
