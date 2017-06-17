@@ -1,3 +1,4 @@
+
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
@@ -101,6 +102,25 @@ namespace Microsoft.AspNetCore.Authentication
             Assert.Equal("A", (await provider.GetDefaultSignOutSchemeAsync()).Name);
         }
 
+        [Fact]
+        public async Task SignInSignOutDefaultsToOnlyOne()
+        {
+            var services = new ServiceCollection().AddOptions().AddAuthenticationCore(o =>
+            {
+                o.AddScheme<Handler>("basic", "whatever");
+                o.AddScheme<SignOutHandler>("signout", "whatever");
+                o.AddScheme<SignInHandler>("signin", "whatever");
+                o.DefaultAuthenticateScheme = "basic";
+            }).BuildServiceProvider();
+
+            var provider = services.GetRequiredService<IAuthenticationSchemeProvider>();
+            Assert.Equal("basic", (await provider.GetDefaultForbidSchemeAsync()).Name);
+            Assert.Equal("basic", (await provider.GetDefaultAuthenticateSchemeAsync()).Name);
+            Assert.Equal("basic", (await provider.GetDefaultChallengeSchemeAsync()).Name);
+            Assert.Equal("signin", (await provider.GetDefaultSignInSchemeAsync()).Name);
+            Assert.Equal("signout", (await provider.GetDefaultSignOutSchemeAsync()).Name);
+        }
+
         private class Handler : IAuthenticationHandler
         {
             public Task<AuthenticateResult> AuthenticateAsync()
@@ -122,12 +142,26 @@ namespace Microsoft.AspNetCore.Authentication
             {
                 throw new NotImplementedException();
             }
+        }
 
+        private class SignInHandler : Handler, IAuthenticationSignInHandler
+        {
             public Task SignInAsync(ClaimsPrincipal user, AuthenticationProperties properties)
             {
                 throw new NotImplementedException();
             }
+        }
 
+        private class SignOutHandler : Handler, IAuthenticationSignOutHandler
+        {
+            public Task SignOutAsync(AuthenticationProperties properties)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        private class Uberhandler : SignInHandler, IAuthenticationSignOutHandler
+        {
             public Task SignOutAsync(AuthenticationProperties properties)
             {
                 throw new NotImplementedException();

@@ -99,6 +99,10 @@ namespace Microsoft.AspNetCore.Authentication
             {
                 return GetSchemeAsync(_options.DefaultSignInScheme);
             }
+            if (_signInHandlers.Count() == 1)
+            {
+                return Task.FromResult(_signInHandlers[0]);
+            }
             return GetDefaultAuthenticateSchemeAsync();
         }
 
@@ -113,6 +117,10 @@ namespace Microsoft.AspNetCore.Authentication
             if (_options.DefaultSignOutScheme != null)
             {
                 return GetSchemeAsync(_options.DefaultSignOutScheme);
+            }
+            if (_signOutHandlers.Count() == 1)
+            {
+                return Task.FromResult(_signOutHandlers[0]);
             }
             return GetDefaultSignInSchemeAsync();
         }
