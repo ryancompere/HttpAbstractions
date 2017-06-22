@@ -18,7 +18,7 @@ namespace Microsoft.AspNetCore.Authentication
         {
             var services = new ServiceCollection().AddOptions().AddAuthenticationCore(o =>
             {
-                o.AddScheme<Uberhandler>("signin", "whatever");
+                o.AddScheme<SignInHandler>("signin", "whatever");
                 o.AddScheme<Handler>("foobly", "whatever");
                 o.DefaultSignInScheme = "signin";
             }).BuildServiceProvider();
@@ -50,7 +50,7 @@ namespace Microsoft.AspNetCore.Authentication
         {
             var services = new ServiceCollection().AddOptions().AddAuthenticationCore(o =>
             {
-                o.AddScheme<Uberhandler>("single", "whatever");
+                o.AddScheme<SignInHandler>("single", "whatever");
             }).BuildServiceProvider();
 
             var provider = services.GetRequiredService<IAuthenticationSchemeProvider>();
@@ -68,7 +68,7 @@ namespace Microsoft.AspNetCore.Authentication
             {
                 o.DefaultAuthenticateScheme = "B";
                 o.AddScheme<Handler>("A", "whatever");
-                o.AddScheme<Uberhandler>("B", "whatever");
+                o.AddScheme<SignInHandler>("B", "whatever");
             }).BuildServiceProvider();
 
             var provider = services.GetRequiredService<IAuthenticationSchemeProvider>();
@@ -84,9 +84,9 @@ namespace Microsoft.AspNetCore.Authentication
         {
             var services = new ServiceCollection().AddOptions().AddAuthenticationCore(o =>
             {
-                o.AddScheme<Uberhandler>("A", "whatever");
-                o.AddScheme<Uberhandler>("B", "whatever");
-                o.AddScheme<Uberhandler>("C", "whatever");
+                o.AddScheme<SignInHandler>("A", "whatever");
+                o.AddScheme<SignInHandler>("B", "whatever");
+                o.AddScheme<SignInHandler>("C", "whatever");
                 o.DefaultChallengeScheme = "A";
                 o.DefaultForbidScheme = "B";
                 o.DefaultSignInScheme = "C";
@@ -131,7 +131,7 @@ namespace Microsoft.AspNetCore.Authentication
             Assert.Equal("basic", (await provider.GetDefaultAuthenticateSchemeAsync()).Name);
             Assert.Equal("basic", (await provider.GetDefaultChallengeSchemeAsync()).Name);
             Assert.Equal("signin", (await provider.GetDefaultSignInSchemeAsync()).Name);
-            Assert.Equal("signout", (await provider.GetDefaultSignOutSchemeAsync()).Name);
+            Assert.Equal("signin", (await provider.GetDefaultSignOutSchemeAsync()).Name); // Defaults to single sign in scheme
         }
 
         [Fact]
@@ -139,15 +139,13 @@ namespace Microsoft.AspNetCore.Authentication
         {
             var services = new ServiceCollection().AddOptions().AddAuthenticationCore(o =>
             {
-                o.AddScheme<SignInHandler>("signin", "whatever");
+                o.AddScheme<Handler>("signin", "whatever");
                 o.DefaultSignInScheme = "signin";
             }).BuildServiceProvider();
 
             var provider = services.GetRequiredService<IAuthenticationSchemeProvider>();
-            Assert.Equal("signin", (await provider.GetDefaultSignInSchemeAsync()).Name);
             Assert.Null(await provider.GetDefaultSignOutSchemeAsync());
         }
-
 
         private class Handler : IAuthenticationHandler
         {
@@ -178,6 +176,11 @@ namespace Microsoft.AspNetCore.Authentication
             {
                 throw new NotImplementedException();
             }
+
+            public Task SignOutAsync(AuthenticationProperties properties)
+            {
+                throw new NotImplementedException();
+            }
         }
 
         private class SignOutHandler : Handler, IAuthenticationSignOutHandler
@@ -187,14 +190,5 @@ namespace Microsoft.AspNetCore.Authentication
                 throw new NotImplementedException();
             }
         }
-
-        private class Uberhandler : SignInHandler, IAuthenticationSignOutHandler
-        {
-            public Task SignOutAsync(AuthenticationProperties properties)
-            {
-                throw new NotImplementedException();
-            }
-        }
-
     }
 }

@@ -124,7 +124,7 @@ namespace Microsoft.AspNetCore.Authentication
             {
                 return _signOutHandlers[0];
             }
-            return EnsureAssignable<IAuthenticationSignOutHandler>(await GetDefaultSignInSchemeAsync());
+            return await GetDefaultSignInSchemeAsync();
         }
 
         /// <summary>

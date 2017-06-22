@@ -9,7 +9,7 @@ namespace Microsoft.AspNetCore.Authentication
     /// <summary>
     /// Used to determine if a handler supports SignIn.
     /// </summary>
-    public interface IAuthenticationSignInHandler : IAuthenticationHandler
+    public interface IAuthenticationSignInHandler : IAuthenticationSignOutHandler
     {
         /// <summary>
         /// Handle sign in.

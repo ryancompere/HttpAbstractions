@@ -13,7 +13,7 @@ namespace Microsoft.AspNetCore.Authentication
     public class AuthenticationServiceTests
     {
         [Fact]
-        public async Task CanOnlySignInIfSignInHandler()
+        public async Task CanOnlySignInIfSupported()
         {
             var services = new ServiceCollection().AddOptions().AddAuthenticationCore(o =>
             {
@@ -32,7 +32,7 @@ namespace Microsoft.AspNetCore.Authentication
         }
 
         [Fact]
-        public async Task CanOnlySignOutIfSignOutHandler()
+        public async Task CanOnlySignOutIfSupported()
         {
             var services = new ServiceCollection().AddOptions().AddAuthenticationCore(o =>
             {
@@ -47,7 +47,7 @@ namespace Microsoft.AspNetCore.Authentication
             await context.SignOutAsync("uber");
             await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignOutAsync("base"));
             await context.SignOutAsync("signout");
-            await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignOutAsync("signin"));
+            await context.SignOutAsync("signin");
         }
 
         [Fact]
@@ -97,7 +97,7 @@ namespace Microsoft.AspNetCore.Authentication
             await context.AuthenticateAsync();
             await context.ChallengeAsync();
             await context.ForbidAsync();
-            await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignOutAsync());
+            await context.SignOutAsync();
             await context.SignInAsync(new ClaimsPrincipal());
         }
 
@@ -123,7 +123,7 @@ namespace Microsoft.AspNetCore.Authentication
         {
             public Task<AuthenticateResult> AuthenticateAsync()
             {
-                return Task.FromResult(AuthenticateResult.Ignore());
+                return Task.FromResult(AuthenticateResult.NoResult());
             }
 
             public Task ChallengeAsync(AuthenticationProperties properties)
@@ -146,7 +146,7 @@ namespace Microsoft.AspNetCore.Authentication
         {
             public Task<AuthenticateResult> AuthenticateAsync()
             {
-                return Task.FromResult(AuthenticateResult.Ignore());
+                return Task.FromResult(AuthenticateResult.NoResult());
             }
 
             public Task ChallengeAsync(AuthenticationProperties properties)
@@ -168,13 +168,18 @@ namespace Microsoft.AspNetCore.Authentication
             {
                 return Task.FromResult(0);
             }
+
+            public Task SignOutAsync(AuthenticationProperties properties)
+            {
+                return Task.FromResult(0);
+            }
         }
 
         public class SignOutHandler : IAuthenticationSignOutHandler
         {
             public Task<AuthenticateResult> AuthenticateAsync()
             {
-                return Task.FromResult(AuthenticateResult.Ignore());
+                return Task.FromResult(AuthenticateResult.NoResult());
             }
 
             public Task ChallengeAsync(AuthenticationProperties properties)
@@ -202,7 +207,7 @@ namespace Microsoft.AspNetCore.Authentication
         {
             public Task<AuthenticateResult> AuthenticateAsync()
             {
-                return Task.FromResult(AuthenticateResult.Ignore());
+                return Task.FromResult(AuthenticateResult.NoResult());
             }
 
             public Task ChallengeAsync(AuthenticationProperties properties)
