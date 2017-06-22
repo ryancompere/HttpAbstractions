@@ -41,7 +41,7 @@ namespace Microsoft.AspNetCore.Authentication
         /// <summary>
         /// Indicates that there was no information returned for this authentication scheme.
         /// </summary>
-        public bool Nothing { get; protected set; }
+        public bool Ignored { get; protected set; }
 
         /// <summary>
         /// Indicates that authentication was successful.
@@ -61,9 +61,9 @@ namespace Microsoft.AspNetCore.Authentication
         /// Indicates that there was no information returned for this authentication scheme.
         /// </summary>
         /// <returns>The result.</returns>
-        public static AuthenticateResult None()
+        public static AuthenticateResult Ignore()
         {
-            return new AuthenticateResult() { Nothing = true };
+            return new AuthenticateResult() { Ignored = true };
         }
 
         /// <summary>

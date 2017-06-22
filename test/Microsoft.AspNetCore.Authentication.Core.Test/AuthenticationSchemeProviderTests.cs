@@ -18,7 +18,7 @@ namespace Microsoft.AspNetCore.Authentication
         {
             var services = new ServiceCollection().AddOptions().AddAuthenticationCore(o =>
             {
-                o.AddScheme<Handler>("signin", "whatever");
+                o.AddScheme<Uberhandler>("signin", "whatever");
                 o.AddScheme<Handler>("foobly", "whatever");
                 o.DefaultSignInScheme = "signin";
             }).BuildServiceProvider();
@@ -50,7 +50,7 @@ namespace Microsoft.AspNetCore.Authentication
         {
             var services = new ServiceCollection().AddOptions().AddAuthenticationCore(o =>
             {
-                o.AddScheme<Handler>("single", "whatever");
+                o.AddScheme<Uberhandler>("single", "whatever");
             }).BuildServiceProvider();
 
             var provider = services.GetRequiredService<IAuthenticationSchemeProvider>();
@@ -68,7 +68,7 @@ namespace Microsoft.AspNetCore.Authentication
             {
                 o.DefaultAuthenticateScheme = "B";
                 o.AddScheme<Handler>("A", "whatever");
-                o.AddScheme<Handler>("B", "whatever");
+                o.AddScheme<Uberhandler>("B", "whatever");
             }).BuildServiceProvider();
 
             var provider = services.GetRequiredService<IAuthenticationSchemeProvider>();
@@ -84,9 +84,9 @@ namespace Microsoft.AspNetCore.Authentication
         {
             var services = new ServiceCollection().AddOptions().AddAuthenticationCore(o =>
             {
-                o.AddScheme<Handler>("A", "whatever");
-                o.AddScheme<Handler>("B", "whatever");
-                o.AddScheme<Handler>("C", "whatever");
+                o.AddScheme<Uberhandler>("A", "whatever");
+                o.AddScheme<Uberhandler>("B", "whatever");
+                o.AddScheme<Uberhandler>("C", "whatever");
                 o.DefaultChallengeScheme = "A";
                 o.DefaultForbidScheme = "B";
                 o.DefaultSignInScheme = "C";
@@ -100,6 +100,19 @@ namespace Microsoft.AspNetCore.Authentication
             Assert.Equal("A", (await provider.GetDefaultChallengeSchemeAsync()).Name);
             Assert.Equal("C", (await provider.GetDefaultSignInSchemeAsync()).Name);
             Assert.Equal("A", (await provider.GetDefaultSignOutSchemeAsync()).Name);
+        }
+
+        [Fact]
+        public async Task DefaultSignInOutWillReturnNullIfNotSignInHandler()
+        {
+            var services = new ServiceCollection().AddOptions().AddAuthenticationCore(o =>
+            {
+                o.AddScheme<Handler>("A", "whatever");
+            }).BuildServiceProvider();
+
+            var provider = services.GetRequiredService<IAuthenticationSchemeProvider>();
+            Assert.Null(await provider.GetDefaultSignInSchemeAsync());
+            Assert.Null(await provider.GetDefaultSignOutSchemeAsync());
         }
 
         [Fact]
@@ -120,6 +133,21 @@ namespace Microsoft.AspNetCore.Authentication
             Assert.Equal("signin", (await provider.GetDefaultSignInSchemeAsync()).Name);
             Assert.Equal("signout", (await provider.GetDefaultSignOutSchemeAsync()).Name);
         }
+
+        [Fact]
+        public async Task SignOutWillNotDefaultsToSignInThatDoesNotSignOut()
+        {
+            var services = new ServiceCollection().AddOptions().AddAuthenticationCore(o =>
+            {
+                o.AddScheme<SignInHandler>("signin", "whatever");
+                o.DefaultSignInScheme = "signin";
+            }).BuildServiceProvider();
+
+            var provider = services.GetRequiredService<IAuthenticationSchemeProvider>();
+            Assert.Equal("signin", (await provider.GetDefaultSignInSchemeAsync()).Name);
+            Assert.Null(await provider.GetDefaultSignOutSchemeAsync());
+        }
+
 
         private class Handler : IAuthenticationHandler
         {

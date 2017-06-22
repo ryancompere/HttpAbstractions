@@ -123,7 +123,7 @@ namespace Microsoft.AspNetCore.Authentication
         {
             public Task<AuthenticateResult> AuthenticateAsync()
             {
-                return Task.FromResult(AuthenticateResult.None());
+                return Task.FromResult(AuthenticateResult.Ignore());
             }
 
             public Task ChallengeAsync(AuthenticationProperties properties)
@@ -146,7 +146,7 @@ namespace Microsoft.AspNetCore.Authentication
         {
             public Task<AuthenticateResult> AuthenticateAsync()
             {
-                return Task.FromResult(AuthenticateResult.None());
+                return Task.FromResult(AuthenticateResult.Ignore());
             }
 
             public Task ChallengeAsync(AuthenticationProperties properties)
@@ -174,7 +174,7 @@ namespace Microsoft.AspNetCore.Authentication
         {
             public Task<AuthenticateResult> AuthenticateAsync()
             {
-                return Task.FromResult(AuthenticateResult.None());
+                return Task.FromResult(AuthenticateResult.Ignore());
             }
 
             public Task ChallengeAsync(AuthenticationProperties properties)
@@ -202,7 +202,7 @@ namespace Microsoft.AspNetCore.Authentication
         {
             public Task<AuthenticateResult> AuthenticateAsync()
             {
-                return Task.FromResult(AuthenticateResult.None());
+                return Task.FromResult(AuthenticateResult.Ignore());
             }
 
             public Task ChallengeAsync(AuthenticationProperties properties)
