@@ -103,19 +103,6 @@ namespace Microsoft.AspNetCore.Authentication
         }
 
         [Fact]
-        public async Task DefaultSignInOutWillReturnNullIfNotSignInHandler()
-        {
-            var services = new ServiceCollection().AddOptions().AddAuthenticationCore(o =>
-            {
-                o.AddScheme<Handler>("A", "whatever");
-            }).BuildServiceProvider();
-
-            var provider = services.GetRequiredService<IAuthenticationSchemeProvider>();
-            Assert.Null(await provider.GetDefaultSignInSchemeAsync());
-            Assert.Null(await provider.GetDefaultSignOutSchemeAsync());
-        }
-
-        [Fact]
         public async Task SignInSignOutDefaultsToOnlyOne()
         {
             var services = new ServiceCollection().AddOptions().AddAuthenticationCore(o =>
@@ -135,7 +122,7 @@ namespace Microsoft.AspNetCore.Authentication
         }
 
         [Fact]
-        public async Task SignOutWillNotDefaultsToSignInThatDoesNotSignOut()
+        public async Task SignOutWillDefaultsToSignInThatDoesNotSignOut()
         {
             var services = new ServiceCollection().AddOptions().AddAuthenticationCore(o =>
             {
@@ -144,7 +131,7 @@ namespace Microsoft.AspNetCore.Authentication
             }).BuildServiceProvider();
 
             var provider = services.GetRequiredService<IAuthenticationSchemeProvider>();
-            Assert.Null(await provider.GetDefaultSignOutSchemeAsync());
+            Assert.NotNull(await provider.GetDefaultSignOutSchemeAsync());
         }
 
         private class Handler : IAuthenticationHandler

@@ -94,17 +94,17 @@ namespace Microsoft.AspNetCore.Authentication
         /// this will fallback to <see cref="GetDefaultAuthenticateSchemeAsync"/>.
         /// </summary>
         /// <returns>The scheme that will be used by default for <see cref="IAuthenticationService.SignInAsync(HttpContext, string, System.Security.Claims.ClaimsPrincipal, AuthenticationProperties)"/>.</returns>
-        public virtual async Task<AuthenticationScheme> GetDefaultSignInSchemeAsync()
+        public virtual Task<AuthenticationScheme> GetDefaultSignInSchemeAsync()
         {
             if (_options.DefaultSignInScheme != null)
             {
-                return EnsureAssignable<IAuthenticationSignInHandler>(await GetSchemeAsync(_options.DefaultSignInScheme));
+                return GetSchemeAsync(_options.DefaultSignInScheme);
             }
             if (_signInHandlers.Count == 1)
             {
-                return _signInHandlers[0];
+                return Task.FromResult(_signInHandlers[0]);
             }
-            return EnsureAssignable<IAuthenticationSignInHandler>(await GetDefaultAuthenticateSchemeAsync());
+            return GetDefaultAuthenticateSchemeAsync();
         }
 
         /// <summary>
@@ -114,17 +114,17 @@ namespace Microsoft.AspNetCore.Authentication
         /// this will fallback to <see cref="GetDefaultSignInSchemeAsync"/> if that supoorts sign out.
         /// </summary>
         /// <returns>The scheme that will be used by default for <see cref="IAuthenticationService.SignOutAsync(HttpContext, string, AuthenticationProperties)"/>.</returns>
-        public virtual async Task<AuthenticationScheme> GetDefaultSignOutSchemeAsync()
+        public virtual Task<AuthenticationScheme> GetDefaultSignOutSchemeAsync()
         {
             if (_options.DefaultSignOutScheme != null)
             {
-                return EnsureAssignable<IAuthenticationSignOutHandler>(await GetSchemeAsync(_options.DefaultSignOutScheme));
+                return GetSchemeAsync(_options.DefaultSignOutScheme);
             }
             if (_signOutHandlers.Count == 1)
             {
-                return _signOutHandlers[0];
+                return Task.FromResult(_signOutHandlers[0]);
             }
-            return await GetDefaultSignInSchemeAsync();
+            return GetDefaultSignInSchemeAsync();
         }
 
         /// <summary>
@@ -207,14 +207,5 @@ namespace Microsoft.AspNetCore.Authentication
 
         public virtual Task<IEnumerable<AuthenticationScheme>> GetAllSchemesAsync()
             => Task.FromResult<IEnumerable<AuthenticationScheme>>(_map.Values);
-
-        private static AuthenticationScheme EnsureAssignable<T>(AuthenticationScheme scheme) where T : class
-        {
-            if (scheme != null && typeof(T).IsAssignableFrom(scheme.HandlerType))
-            {
-                return scheme;
-            }
-            return null;
-        }
     }
 }
