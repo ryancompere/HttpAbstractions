@@ -39,9 +39,30 @@ namespace Microsoft.AspNetCore.Authentication
         private List<AuthenticationScheme> _signInHandlers = new List<AuthenticationScheme>();
 
         /// <summary>
+        /// Returns the scheme that should be used to set <see cref="HttpContext.User"/>.
+        /// This is typically specified via <see cref="AuthenticationOptions.AutomaticAuthenticateScheme"/>.
+        /// Otherwise, if <see cref="AuthenticationOptions.EnableDefaultFallback"/> is true,
+        /// this will fallback to <see cref="GetDefaultAuthenticateSchemeAsync"/>.
+        /// </summary>
+        /// <returns>The scheme that will be used by default for <see cref="IAuthenticationService.ChallengeAsync(HttpContext, string, AuthenticationProperties)"/>.</returns>
+        public Task<AuthenticationScheme> GetAutomaticAuthenticateSchemeAsync()
+        {
+            if (_options.AutomaticAuthenticateScheme != null)
+            {
+                return GetSchemeAsync(_options.AutomaticAuthenticateScheme);
+            }
+            if (_options.EnableDefaultFallback)
+            {
+                return GetDefaultAuthenticateSchemeAsync();
+            }
+            return Task.FromResult<AuthenticationScheme>(null);
+        }
+
+        /// <summary>
         /// Returns the scheme that will be used by default for <see cref="IAuthenticationService.AuthenticateAsync(HttpContext, string)"/>.
         /// This is typically specified via <see cref="AuthenticationOptions.DefaultAuthenticateScheme"/>.
-        /// Otherwise, if only a single scheme exists, that will be used, if more than one exists, null will be returned.
+        /// Otherwise, if <see cref="AuthenticationOptions.EnableDefaultFallback"/> and <see cref="AuthenticationOptions.EnableDefaultSingleHandlerFallback"/>
+        /// are true, if only a single scheme exists, that will be used, if more than one exists, null will be returned.
         /// </summary>
         /// <returns>The scheme that will be used by default for <see cref="IAuthenticationService.AuthenticateAsync(HttpContext, string)"/>.</returns>
         public virtual Task<AuthenticationScheme> GetDefaultAuthenticateSchemeAsync()
@@ -50,7 +71,9 @@ namespace Microsoft.AspNetCore.Authentication
             {
                 return GetSchemeAsync(_options.DefaultAuthenticateScheme);
             }
-            if (_map.Count == 1)
+            if (_options.EnableDefaultFallback && 
+                _options.EnableDefaultSingleHandlerFallback && 
+                _map.Count == 1)
             {
                 return Task.FromResult(_map.Values.First());
             }
@@ -60,7 +83,8 @@ namespace Microsoft.AspNetCore.Authentication
         /// <summary>
         /// Returns the scheme that will be used by default for <see cref="IAuthenticationService.ChallengeAsync(HttpContext, string, AuthenticationProperties)"/>.
         /// This is typically specified via <see cref="AuthenticationOptions.DefaultChallengeScheme"/>.
-        /// Otherwise, this will fallback to <see cref="GetDefaultAuthenticateSchemeAsync"/>.
+        /// Otherwise, if <see cref="AuthenticationOptions.EnableDefaultFallback"/> is true,
+        /// this will fallback to <see cref="GetDefaultAuthenticateSchemeAsync"/>.
         /// </summary>
         /// <returns>The scheme that will be used by default for <see cref="IAuthenticationService.ChallengeAsync(HttpContext, string, AuthenticationProperties)"/>.</returns>
         public virtual Task<AuthenticationScheme> GetDefaultChallengeSchemeAsync()
@@ -69,13 +93,18 @@ namespace Microsoft.AspNetCore.Authentication
             {
                 return GetSchemeAsync(_options.DefaultChallengeScheme);
             }
-            return GetDefaultAuthenticateSchemeAsync();
+            if (_options.EnableDefaultFallback)
+            {
+                return GetDefaultAuthenticateSchemeAsync();
+            }
+            return Task.FromResult<AuthenticationScheme>(null);
         }
 
         /// <summary>
         /// Returns the scheme that will be used by default for <see cref="IAuthenticationService.ForbidAsync(HttpContext, string, AuthenticationProperties)"/>.
         /// This is typically specified via <see cref="AuthenticationOptions.DefaultForbidScheme"/>.
-        /// Otherwise, this will fallback to <see cref="GetDefaultChallengeSchemeAsync"/> .
+        /// Otherwise, if <see cref="AuthenticationOptions.EnableDefaultFallback"/> is true,
+        /// this will fallback to <see cref="GetDefaultChallengeSchemeAsync"/> .
         /// </summary>
         /// <returns>The scheme that will be used by default for <see cref="IAuthenticationService.ForbidAsync(HttpContext, string, AuthenticationProperties)"/>.</returns>
         public virtual Task<AuthenticationScheme> GetDefaultForbidSchemeAsync()
@@ -84,13 +113,19 @@ namespace Microsoft.AspNetCore.Authentication
             {
                 return GetSchemeAsync(_options.DefaultForbidScheme);
             }
-            return GetDefaultChallengeSchemeAsync();
+            if (_options.EnableDefaultFallback)
+            {
+                return GetDefaultChallengeSchemeAsync();
+            }
+            return Task.FromResult<AuthenticationScheme>(null);
         }
 
         /// <summary>
         /// Returns the scheme that will be used by default for <see cref="IAuthenticationService.SignInAsync(HttpContext, string, System.Security.Claims.ClaimsPrincipal, AuthenticationProperties)"/>.
         /// This is typically specified via <see cref="AuthenticationOptions.DefaultSignInScheme"/>.
-        /// If only a single sign in handler scheme exists, that will be used, if more than one exists,
+        /// Otherwise, if <see cref="AuthenticationOptions.EnableDefaultFallback"/> is true,
+        /// then if <see cref="AuthenticationOptions.EnableDefaultSingleHandlerFallback"/> is true and
+        /// only a single sign in handler scheme exists, that will be used, otherwise,
         /// this will fallback to <see cref="GetDefaultAuthenticateSchemeAsync"/>.
         /// </summary>
         /// <returns>The scheme that will be used by default for <see cref="IAuthenticationService.SignInAsync(HttpContext, string, System.Security.Claims.ClaimsPrincipal, AuthenticationProperties)"/>.</returns>
@@ -100,17 +135,23 @@ namespace Microsoft.AspNetCore.Authentication
             {
                 return GetSchemeAsync(_options.DefaultSignInScheme);
             }
-            if (_signInHandlers.Count == 1)
+            if (_options.EnableDefaultFallback)
             {
-                return Task.FromResult(_signInHandlers[0]);
+                if (_options.EnableDefaultSingleHandlerFallback && _signInHandlers.Count == 1)
+                {
+                    return Task.FromResult(_signInHandlers[0]);
+                }
+                return GetDefaultAuthenticateSchemeAsync();
             }
-            return GetDefaultAuthenticateSchemeAsync();
+            return Task.FromResult<AuthenticationScheme>(null);
         }
 
         /// <summary>
         /// Returns the scheme that will be used by default for <see cref="IAuthenticationService.SignOutAsync(HttpContext, string, AuthenticationProperties)"/>.
         /// This is typically specified via <see cref="AuthenticationOptions.DefaultSignOutScheme"/>.
-        /// If only a single sign out handler scheme exists, that will be used, if more than one exists,
+        /// Otherwise, if <see cref="AuthenticationOptions.EnableDefaultFallback"/> is true,
+        /// then if <see cref="AuthenticationOptions.EnableDefaultSingleHandlerFallback"/> is true and
+        /// only a single sign out handler scheme exists, that will be used, otherwise if more than one exists,
         /// this will fallback to <see cref="GetDefaultSignInSchemeAsync"/> if that supoorts sign out.
         /// </summary>
         /// <returns>The scheme that will be used by default for <see cref="IAuthenticationService.SignOutAsync(HttpContext, string, AuthenticationProperties)"/>.</returns>
@@ -120,11 +161,15 @@ namespace Microsoft.AspNetCore.Authentication
             {
                 return GetSchemeAsync(_options.DefaultSignOutScheme);
             }
-            if (_signOutHandlers.Count == 1)
+            if (_options.EnableDefaultFallback)
             {
-                return Task.FromResult(_signOutHandlers[0]);
+                if (_options.EnableDefaultSingleHandlerFallback && _signOutHandlers.Count == 1)
+                {
+                    return Task.FromResult(_signOutHandlers[0]);
+                }
+                return GetDefaultSignInSchemeAsync();
             }
-            return GetDefaultSignInSchemeAsync();
+            return Task.FromResult<AuthenticationScheme>(null);
         }
 
         /// <summary>
@@ -205,6 +250,10 @@ namespace Microsoft.AspNetCore.Authentication
             }
         }
 
+        /// <summary>
+        /// Returns all registered schemes.
+        /// </summary>
+        /// <returns>All registered schemes.</returns>
         public virtual Task<IEnumerable<AuthenticationScheme>> GetAllSchemesAsync()
             => Task.FromResult<IEnumerable<AuthenticationScheme>>(_map.Values);
     }

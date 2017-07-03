@@ -61,17 +61,22 @@ namespace Microsoft.AspNetCore.Authentication
             });
 
         /// <summary>
-        /// Used by as the default scheme by <see cref="IAuthenticationService.AuthenticateAsync(HttpContext, string)"/>.
+        /// The scheme that will should be authenticated automatically used to set <see cref="HttpContext.User"/>"/>.
+        /// </summary>
+        public string AutomaticAuthenticateScheme { get; set; }
+
+        /// <summary>
+        /// Used as the default scheme by <see cref="IAuthenticationService.AuthenticateAsync(HttpContext, string)"/>.
         /// </summary>
         public string DefaultAuthenticateScheme { get; set; }
 
         /// <summary>
-        /// Used by as the default scheme by <see cref="IAuthenticationService.SignInAsync(HttpContext, string, System.Security.Claims.ClaimsPrincipal, AuthenticationProperties)"/>.
+        /// Used as the default scheme by <see cref="IAuthenticationService.SignInAsync(HttpContext, string, System.Security.Claims.ClaimsPrincipal, AuthenticationProperties)"/>.
         /// </summary>
         public string DefaultSignInScheme { get; set; }
 
         /// <summary>
-        /// Used by as the default scheme by <see cref="IAuthenticationService.SignOutAsync(HttpContext, string, AuthenticationProperties)"/>.
+        /// Used as the default scheme by <see cref="IAuthenticationService.SignOutAsync(HttpContext, string, AuthenticationProperties)"/>.
         /// </summary>
         public string DefaultSignOutScheme { get; set; }
 
@@ -84,5 +89,19 @@ namespace Microsoft.AspNetCore.Authentication
         /// Used by as the default scheme by <see cref="IAuthenticationService.ForbidAsync(HttpContext, string, AuthenticationProperties)"/>.
         /// </summary>
         public string DefaultForbidScheme { get; set; }
+
+        /// <summary>
+        /// If set, the default <see cref="IAuthenticationSchemeProvider"/> will attempt to fallback logic when 
+        /// Default[Authenticate/SignIn/SignOut/Challenge/Forbid]Schemes are not set.
+        /// This is enabled by default.
+        /// </summary>
+        public bool EnableDefaultFallback { get; set; } = true;
+
+        /// <summary>
+        /// If <see cref="EnableDefaultFallback"/> and this are both true, the default <see cref="IAuthenticationSchemeProvider"/> will use a single handler as the default for 
+        /// the Default[Authenticate/SignIn/SignOut/Challenge/Forbid]Schemes.
+        /// This is enabled by default.
+        /// </summary>
+        public bool EnableDefaultSingleHandlerFallback { get; set; } = true;
     }
 }
