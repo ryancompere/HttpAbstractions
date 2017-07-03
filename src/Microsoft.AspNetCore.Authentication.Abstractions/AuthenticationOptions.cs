@@ -61,7 +61,7 @@ namespace Microsoft.AspNetCore.Authentication
             });
 
         /// <summary>
-        /// The scheme that will should be authenticated automatically used to set <see cref="HttpContext.User"/>"/>.
+        /// The scheme that should be authenticated automatically to set <see cref="HttpContext.User"/>"/>.
         /// </summary>
         public string AutomaticAuthenticateScheme { get; set; }
 
@@ -81,12 +81,12 @@ namespace Microsoft.AspNetCore.Authentication
         public string DefaultSignOutScheme { get; set; }
 
         /// <summary>
-        /// Used by as the default scheme by <see cref="IAuthenticationService.ChallengeAsync(HttpContext, string, AuthenticationProperties)"/>.
+        /// Used as the default scheme by <see cref="IAuthenticationService.ChallengeAsync(HttpContext, string, AuthenticationProperties)"/>.
         /// </summary>
         public string DefaultChallengeScheme { get; set; }
 
         /// <summary>
-        /// Used by as the default scheme by <see cref="IAuthenticationService.ForbidAsync(HttpContext, string, AuthenticationProperties)"/>.
+        /// Used as the default scheme by <see cref="IAuthenticationService.ForbidAsync(HttpContext, string, AuthenticationProperties)"/>.
         /// </summary>
         public string DefaultForbidScheme { get; set; }
 
